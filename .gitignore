@@ -1,0 +1,4 @@
+venv
+*.pyc
+env.yaml
+play_credentials.json
