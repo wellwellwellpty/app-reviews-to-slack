@@ -47,6 +47,10 @@ All configuration is done via environment variables. Use `env.yaml` or whatever 
 | TIMEZONE | Timezone to match something that makes sense to you | `Africa/Johannesburg` | 
 | RUN_FREQUENCY_MINUTES | How frequent the cronjob is configured to run | `60` |
 | CREDENTIAL_FILE | The Service Account key | `play_credentials.json` |
+| PLAY_DEVELOPER_ID | ID after `developers/` in Play Store Console | None |
+| PLAY_APPLICATION_ID | ID after `app/` in the Play Store Console | None |
+
+If both `PLAY_DEVELOPER_ID` and `PLAY_APPLICATION_ID` are set; the Slack message will include a link to the review in the Play Console.
 
 ### Finding your timezone string
 You know where you live, but if you don't:
