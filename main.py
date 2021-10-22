@@ -23,6 +23,8 @@ except KeyError:
 TIMEZONE = timezone(os.environ.get('TIMEZONE', 'Africa/Johannesburg'))
 RUN_FREQUENCY_MINUTES = int(os.environ.get('RUN_FREQUENCY_MINUTES', 60))
 CREDENTIAL_FILE = os.environ.get('CREDENTIAL_FILE', 'play_credentials.json')
+PLAY_DEVELOPER_ID = os.environ.get('PLAY_DEVELOPER_ID', None)
+PLAY_APPLICATION_ID = os.environ.get('PLAY_APPLICATION_ID', None)
 
 APPLE_RSS = 'https://itunes.apple.com/za/rss/customerreviews/id={}/sortby=mostrecent/xml'.format(APPLE_APP_ID)
 
@@ -49,6 +51,11 @@ def http_android_reviews(request):
     return 'success', 200
 
 
+def _get_play_store_review_url(review_id):
+    url = f"https://play.google.com/console/u/0/developers/{PLAY_DEVELOPER_ID}/app/{PLAY_APPLICATION_ID}/user-feedback/review-details?reviewId={review_id}&corpus=PUBLIC_REVIEWS"
+    return url
+
+
 def _send_to_slack(data, platform):
     url = SLACK_WEBHOOK
 
@@ -62,6 +69,10 @@ def _send_to_slack(data, platform):
         )
 
         date = "{} - {}".format(data['updated'].astimezone(TIMEZONE), platform)
+
+        if platform == 'android' and PLAY_DEVELOPER_ID and PLAY_APPLICATION_ID:
+            link = _get_play_store_review_url(data['id'])
+            date += f" <{link}|:link:>"
 
         payload = {
             "text": "{} review: {}/5".format(platform, data['rating']),
@@ -151,7 +162,7 @@ def android_reviews():
         rating = e['userComment']['starRating']
 
         doc = {
-            'id': review_id,  # Hacks
+            'id': review_id,
             'updated': last_modified.astimezone(TIMEZONE),
             'author': author.strip(),
             'title': "{} (Android: {})".format(manufacturer, android_os_version),
